@@ -1,7 +1,8 @@
 /* Host page: reads the Arduino over Web Serial and tells the server when the lamp's state changes.
    ?sim   plays a fake Arduino instead of a serial port (no hardware needed)
    ?mock  use the in-browser mock server even if Supabase keys are set
-   ?warmup=N  (with ?sim) shorten the 30 s warm-up to N seconds, for tests */
+   ?warmup=N  (with ?sim) shorten the 30 s warm-up to N seconds, for tests
+   ?off       (with ?sim) the switch is off at boot: the Arduino prints no state line */
 (function (SL) {
   "use strict";
 
@@ -83,13 +84,18 @@
     });
   }
 
+  // The Arduino counts OFF as its starting state and prints "-> ..." only when the state changes.
+  // Switch on at boot: "-> IDLE" follows "start". Switch off at boot: nothing is printed, so if no state
+  // line has come by the end of the warm-up, the lamp is OFF.
+  var sawStateSinceStart = false;
+
   function onLine(line) {
     if (!line.trim()) return;
     pushLog(line);
     var p = parseLine(line);
-    if (p.type === "start") startWarmup();
-    else if (p.type === "warmup-done") warmupDone();
-    else if (p.type === "state") sendState(p.state);
+    if (p.type === "start") { sawStateSinceStart = false; startWarmup(); }
+    else if (p.type === "warmup-done") { warmupDone(); if (!sawStateSinceStart) sendState("OFF"); }
+    else if (p.type === "state") { sawStateSinceStart = true; sendState(p.state); }
   }
 
   function heartbeat() {
@@ -97,17 +103,40 @@
     backend.heartbeat().then(function () { lastBeat = Date.now(); el.beat.textContent = clock(lastBeat); })
       .catch(function (e) { el.beat.textContent = "failed (" + ((e && e.message) || e) + ")"; });
   }
-  function startHeartbeat() { clearInterval(beatTimer); heartbeat(); beatTimer = setInterval(heartbeat, cfg.HEARTBEAT_MS); }
+  // The heartbeat is timed in a Worker: Chrome slows the timers of a tab that is hidden or minimised
+  // (to about once a minute after 5 minutes), which would make the site call the lamp "away".
+  var beatWorker = null;
+  function stopHeartbeat() {
+    clearInterval(beatTimer);
+    if (beatWorker) { beatWorker.terminate(); beatWorker = null; }
+  }
+  function startHeartbeat() {
+    stopHeartbeat(); heartbeat();
+    try {
+      var src = "setInterval(function(){postMessage(1)}," + (+cfg.HEARTBEAT_MS || 20000) + ")";
+      beatWorker = new Worker(URL.createObjectURL(new Blob([src], { type: "text/javascript" })));
+      beatWorker.onmessage = heartbeat;
+    } catch (e) { beatTimer = setInterval(heartbeat, cfg.HEARTBEAT_MS); }
+  }
+
+  // Keep the laptop screen awake while connected (a sleeping laptop stops everything). Best effort.
+  var wakeLock = null;
+  function keepAwake() {
+    if (!("wakeLock" in navigator)) return;
+    navigator.wakeLock.request("screen").then(function (l) { wakeLock = l; l.addEventListener("release", function () { wakeLock = null; }); }).catch(function () {});
+  }
+  document.addEventListener("visibilitychange", function () { if (connected && !wakeLock && document.visibilityState === "visible") keepAwake(); });
 
   function onConnected(label) {
     connected = true; setConn(label); el.connect.disabled = true; warmEnd = 0; renderWarm();
     if (backend) { backend.cleanup(cfg.EVENT_KEEP_DAYS).catch(function () {}); }
-    startHeartbeat();
+    startHeartbeat(); keepAwake();
   }
   function onDisconnected(why) {
     connected = false; setConn("Disconnected" + (why ? " — " + why : "")); el.connect.disabled = false;
     el.connect.textContent = "Connect again"; clearInterval(warmTimer); warmEnd = 0; el.warm.textContent = "—";
-    clearInterval(beatTimer);          // no heartbeat: viewers will see "The light is away" after a minute
+    stopHeartbeat();                   // no heartbeat: viewers will see "The light is away" after a minute
+    if (wakeLock) { wakeLock.release().catch(function () {}); wakeLock = null; }
     warn("The serial connection was lost. Check the USB cable, then press “Connect again”. The Arduino restarts when you reconnect, so wait for the 30 s warm-up.");
   }
 
@@ -166,7 +195,8 @@
     ], period = 20000;
 
     function emit(lines) { lines.forEach(onLine); }
-    emit(["start"]);
+    var SWITCH_OFF = q.has("off");            // ?off: the switch is off at boot, so no state line is ever printed
+    emit(SWITCH_OFF ? ["start"] : ["start", "-> IDLE"]);
     var fade = { from: level, to: level, t: 0, dur: 0 };
     function target(s) { return s === "ACTIVE" ? cfg.LEVEL_ACTIVE : cfg.LEVEL_IDLE; }
     function levelNow(now) {
@@ -183,7 +213,8 @@
     }
 
     setTimeout(function () {
-      emit(["warmup done", "-> IDLE"]);
+      emit(["warmup done"]);
+      if (SWITCH_OFF) { state = "OFF"; level = 0; setInterval(function () { emit(["state=OFF  pir=0  level=0"]); }, 500); return; }
       var base = Date.now(), done = {};
       setInterval(function () {                 // runs the schedule
         var now = Date.now(), k = Math.floor((now - base) / period), within = (now - base) % period;
