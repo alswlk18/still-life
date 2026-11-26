@@ -1,0 +1,381 @@
+/* ==========================================================================
+   Still, Life — site
+   Tokens are the design system's (design-system/style.css). Changes:
+   - Motion: wake and fade now follow the lamp (3000ms, smoothstep)
+   - Typography: --font-ko (Pretendard) added for the Korean sheet text
+   ========================================================================== */
+
+:root {
+  /* ---- Shade ---------------------------------------------------------- */
+  --shade-0: #ffffff;
+  --shade-1: #f5f5f5;
+  --shade-2: #e2e2e2;
+  --shade-3: #c6c6c6;
+  --shade-4: #9a9a9a;
+  --shade-5: #666666;
+  --shade-6: #2a2a2a;
+  --shade-7: #000000;
+
+  --bg: var(--shade-1);
+  --surface: var(--shade-2);
+  --line: var(--shade-3);
+  --text-faint: var(--shade-4);
+  --text-muted: var(--shade-5);
+  --text: var(--shade-6);
+  --silhouette: var(--shade-7);
+
+  /* ---- States: the silhouette is what changes with the lamp ------------ */
+  --silhouette-opacity-dormant: 0;
+  --silhouette-opacity-sensing: 0.3;
+  --silhouette-opacity-awake: 1;
+  --silhouette-blur: 50;          /* px at the 1920px design; scales with the screen; the same at every state */
+  --silhouette-scale-sensing: 0.7394; /* Sensing star is this much smaller than Awake (Figma 623px / 843px) */
+  --silhouette-drop-sensing: 5.65svh; /* and sits this much lower */
+  --silhouette-inset: 12px;       /* how far inside the back ridge the silhouette is cut */
+
+  /* ---- Panel Layers --------------------------------------------------- */
+  --panel-tone: #ffffff;
+  --panel-opacity: 0.45;
+  --blur-front: 0px;
+  --blur-mid: 3px;
+  --blur-back: 3px;
+  --layer-bleed: 64px;
+  --ridge-damp-exp: 0.6;          /* narrow screens flatten ridges so they stay gentle */
+  --ridge-damp-min: 0.4;
+  --record-amp: 0.22;             /* how far the front ridge rises at full brightness (share of the height) */
+  --note-tone: var(--text-muted);
+
+  /* ---- Typography ----------------------------------------------------- */
+  --font: "Instrument Serif", serif;
+  --font-ko: "Pretendard", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+  --type-display: clamp(96px, 11.46vw, 220px);
+  --type-display-lh: 0.9;
+  --type-h2: 44px;
+  --type-h2-lh: 1.1;
+  --type-h3: 28px;
+  --type-h3-lh: 1.2;
+  --type-body: 20px;
+  --type-body-lh: 1.55;
+  --type-small: 16px;
+  --type-small-lh: 1.5;
+  --type-note: 13px;
+  --type-note-lh: 1.4;
+
+  /* ---- Spacing -------------------------------------------------------- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 16px;
+  --space-4: 24px;
+  --space-5: 40px;
+  --space-6: 64px;
+  --space-7: 104px;
+  --space-8: 168px;
+
+  /* ---- Layout --------------------------------------------------------- */
+  --desktop-w: 1440;
+  --page-max: 1440px;
+  --margin: 80px;
+  --stage-margin: 6.25vw;       /* first screen: the Figma frame uses 120px at 1920px */
+  --gutter: 24px;
+  --cols: 12;
+  --title-top: 16.67svh;
+  --min-width: 320px;
+  --frame-ratio: 4 / 5;
+
+  /* ---- Line ----------------------------------------------------------- */
+  --hair: 1px;
+
+  /* ---- Motion --------------------------------------------------------- */
+  --dur-sense: 600ms;
+  --dur-wake: 3000ms;           /* was 1800ms: follows the lamp */
+  --dur-fade: 3000ms;           /* was 3600ms: follows the lamp */
+  --ease-wake: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --ease-fade: cubic-bezier(0.45, 0, 0.55, 1);   /* close to smoothstep */
+}
+
+@media (max-width: 1024px) {
+  :root { --margin: 40px; --stage-margin: var(--margin); }
+}
+@media (max-width: 768px) {
+  :root {
+    --margin: 20px;
+    --stage-margin: var(--margin);
+    --gutter: 16px;
+    --cols: 4;
+    --type-h3: 24px;
+    --type-body: 18px;
+  }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+*, *::before, *::after { box-sizing: border-box; border-radius: 0; }
+
+html {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-weight: 400;
+  font-synthesis: none;
+  font-size: var(--type-body);
+  line-height: var(--type-body-lh);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body { margin: 0; background: var(--bg); min-width: var(--min-width); overflow: hidden; }
+
+h1, h2, p, figure { margin: 0; padding: 0; font-weight: 400; }
+
+::selection { background: var(--shade-7); color: var(--shade-0); }
+
+.t-display { font-size: var(--type-display); line-height: var(--type-display-lh); letter-spacing: -0.02em; }
+
+.wrap {
+  width: 100%;
+  max-width: var(--page-max);
+  margin-inline: auto;
+  padding-inline: var(--margin);
+}
+
+/* Text button: plain text with a hairline underline */
+.textbtn {
+  appearance: none;
+  background: none;
+  border: 0;
+  padding: var(--space-1) 0;
+  margin: 0;
+  font: inherit;
+  font-size: var(--type-small);
+  line-height: var(--type-small-lh);
+  color: var(--text);
+  cursor: pointer;
+  border-bottom: var(--hair) solid var(--text);
+}
+.textbtn:hover { color: var(--shade-7); border-bottom-color: var(--shade-7); }
+.textbtn:focus-visible { outline: var(--hair) solid var(--shade-7); outline-offset: var(--space-1); }
+
+/* ==========================================================================
+   Stage — one screen, no scroll
+   ========================================================================== */
+
+.stage {
+  position: relative;
+  display: block;
+  height: 100svh;
+  overflow: hidden;
+}
+
+.stage__title {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  padding: var(--title-top) var(--stage-margin) 0;
+}
+
+.scene {
+  position: absolute;
+  inset: 0;
+}
+.scene > .silhouette,
+.scene > .layers { position: absolute; inset: 0; height: 100%; }
+
+.stage__foot {
+  position: absolute;
+  z-index: 3;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-width: none;
+  padding-inline: var(--stage-margin);
+  padding-block: var(--space-5);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+/* ==========================================================================
+   Silhouette — behind the layers, cut to the back layer. Only opacity and transform change with
+   the lamp (cheap); the 50px blur never changes. Sizes are in --u, so they follow the screen.
+   ========================================================================== */
+
+.silhouette {
+  --u: max(calc(100vw / 1920), calc(100svh / 1080 * 0.45));
+  pointer-events: none;
+}
+.silhouette__fig {
+  position: absolute;
+  left: 50.64%;
+  top: 53.8%;
+  width: calc(843 * var(--u));
+  height: calc(801.7 * var(--u));
+  transform: translate(-50%, calc(-50% + var(--sil-drop, 1) * var(--silhouette-drop-sensing))) scale(var(--sil-scale, 0.7394));
+  opacity: var(--silhouette-opacity, var(--silhouette-opacity-dormant));
+  will-change: transform, opacity;
+}
+.silhouette__star {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: blur(calc(var(--silhouette-blur) * var(--u)));
+}
+.silhouette__star path { fill: var(--silhouette); }
+/* A real image or video replaces the star: its shape becomes a black silhouette. */
+.silhouette.is-image .silhouette__star,
+.silhouette.is-video .silhouette__star { display: none; }
+/* The mask sits on an inner layer and the blur on the figure, so the blur is applied after the mask. */
+.silhouette.is-image .silhouette__fig { filter: blur(calc(var(--silhouette-blur) * var(--u))); }
+.silhouette.is-image .silhouette__fig::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--silhouette);
+  -webkit-mask: var(--silhouette-src) center bottom / contain no-repeat;
+  mask: var(--silhouette-src) center bottom / contain no-repeat;
+}
+.silhouette__fig video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: brightness(0) blur(calc(var(--silhouette-blur) * var(--u)));
+}
+
+/* ==========================================================================
+   Panel Layers
+   ========================================================================== */
+
+.layers {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+}
+.layers > svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+.layer--back { filter: blur(var(--blur-back)); will-change: transform; }   /* own layer: the blur is cached while the front ridge moves */
+.layer--mid { filter: blur(var(--blur-mid)); will-change: transform; }
+.layer--front { filter: blur(var(--blur-front)); will-change: contents; }
+
+.layers .body {
+  fill: var(--panel-tone);
+  fill-opacity: var(--panel-opacity);
+}
+.layers .ridge {
+  fill: none;
+  stroke: var(--line);
+  stroke-width: var(--hair);
+}
+
+/* ==========================================================================
+   Note
+   ========================================================================== */
+
+.note {
+  display: inline-block;
+  font-size: var(--type-note);
+  line-height: var(--type-note-lh);
+  color: var(--note-tone);
+  white-space: nowrap;
+}
+
+/* ==========================================================================
+   Who are you? — a translucent panel rising from below
+   ========================================================================== */
+
+.sheet-root {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  visibility: hidden;
+  transition: visibility 0s linear var(--dur-sense);
+}
+.sheet-root.is-open { visibility: visible; transition-delay: 0s; }
+
+.sheet__backdrop { position: absolute; inset: 0; }
+
+.sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  top: var(--space-7);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: color-mix(in srgb, var(--panel-tone) 70%, transparent);
+  -webkit-backdrop-filter: blur(var(--blur-back));
+  backdrop-filter: blur(var(--blur-back));
+  border-top: var(--hair) solid var(--line);
+  transform: translateY(100%);
+  transition: transform var(--dur-sense) var(--ease-wake);
+}
+.sheet-root.is-open .sheet { transform: translateY(0); }
+
+.sheet__bar {
+  display: flex;
+  justify-content: flex-end;
+  padding-block: var(--space-4) 0;
+}
+
+.sheet__body {
+  display: grid;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  column-gap: var(--gutter);
+  padding-block: var(--space-5) var(--space-7);
+  font-family: var(--font-ko);
+  font-size: var(--type-body);
+  line-height: var(--type-body-lh);
+  word-break: keep-all;
+}
+.sheet__text { grid-column: 1 / span 6; }
+.sheet__photos {
+  grid-column: 8 / -1;
+  display: grid;
+  gap: var(--gutter);
+  align-content: start;
+}
+.sheet__h {
+  font-family: var(--font-ko);
+  font-weight: 600;
+  font-size: var(--type-small);
+  line-height: var(--type-small-lh);
+  color: var(--text-muted);
+  margin: var(--space-6) 0 var(--space-3);
+  padding-top: var(--space-3);
+  border-top: var(--hair) solid var(--line);
+}
+.sheet__h:first-child { margin-top: 0; }
+.sheet__text p + p { margin-top: var(--space-3); }
+
+.photo-slot {
+  aspect-ratio: var(--frame-ratio);
+  border: var(--hair) solid var(--line);
+  background: color-mix(in srgb, var(--surface) 40%, transparent);
+}
+
+@media (max-width: 1024px) {
+  .sheet__text { grid-column: 1 / -1; }
+  .sheet__photos { grid-column: 1 / -1; grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: var(--space-6); }
+}
+@media (max-width: 768px) {
+  .sheet { top: var(--space-6); }
+}
+
+/* ==========================================================================
+   Reduced motion: the sheet still appears, only without travelling
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet { transition-duration: 1ms; }
+  .sheet-root { transition-duration: 1ms; }
+}

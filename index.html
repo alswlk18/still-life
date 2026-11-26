@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Still, Life</title>
+<meta name="description" content="A lamp that wakes when you move, and a page that wakes with it.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<main class="stage">
+  <h1 class="stage__title t-display">Still, Life</h1>
+
+  <!-- The silhouette (a star for now) sits behind the layers and is seen only through them -->
+  <div class="scene">
+    <div class="silhouette" aria-hidden="true">
+      <div class="silhouette__fig">
+        <svg class="silhouette__star" viewBox="0 0 842.966 801.708" focusable="false"><path d="M421.483 0L520.981 306.225H842.966L582.475 495.483L681.974 801.708L421.483 612.451L160.992 801.708L260.491 495.483L0 306.225H321.984L421.483 0Z"/></svg>
+      </div>
+    </div>
+    <div class="layers" data-layers role="img" aria-label="Three translucent layers. The front ridge draws the lamp's brightness, flowing left."></div>
+  </div>
+
+  <div class="stage__foot wrap">
+    <p class="note" id="status" role="status" aria-live="polite"></p>
+    <button class="textbtn" id="open-about" type="button" aria-haspopup="dialog" aria-expanded="false" aria-controls="about">Who are you?</button>
+  </div>
+</main>
+
+<!-- Who are you? — one translucent panel rising from below. Body copy is a draft. -->
+<div class="sheet-root" id="about">
+  <div class="sheet__backdrop"></div>
+  <section class="sheet" role="dialog" aria-modal="true" aria-label="Who are you?">
+    <div class="sheet__bar wrap">
+      <button class="textbtn" type="button" data-sheet-close>Close</button>
+    </div>
+    <div class="sheet__body wrap">
+      <div class="sheet__text">
+        <h2 class="sheet__h">이름</h2>
+        <p>정물화는 곁에 놓인 것들을 그린 그림입니다.</p>
+        <p>Still, Life는 이 이름을 둘로 나눕니다. Still은 움직이지 않는 것의 고요, Life는 그것이 거기 있었음을 알아차리는 순간입니다.</p>
+
+        <h2 class="sheet__h">조명</h2>
+        <p>반투명한 판 너머에 무언가가 머물러 있습니다.</p>
+        <p>내가 움직이면 조명이 서서히 밝아지며 판 너머의 형체가 드러나고, 멈추면 다시 고요로 돌아갑니다.</p>
+
+        <h2 class="sheet__h">이 페이지</h2>
+        <p>이 페이지는 조명과 함께 깨어납니다.</p>
+        <p>아래의 능선은 조명의 밝기를 실시간으로 그린 것이며, 그려진 선은 왼쪽으로 흘러갑니다.</p>
+      </div>
+      <div class="sheet__photos">
+        <figure class="photo-slot" role="img" aria-label="조명 사진 자리 1"></figure>
+        <figure class="photo-slot" role="img" aria-label="조명 사진 자리 2"></figure>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script src="config.js"></script>
+<script src="js/lamp.js"></script>
+<script src="js/layers.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

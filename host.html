@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Still, Life — Host</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/host.css">
+</head>
+<body class="host">
+<main class="host__wrap">
+  <h1 class="t-h2">Still, Life <span class="host__tag">Host</span></h1>
+  <p class="host__lead t-small">Open this page in Chrome or Edge on the laptop the Arduino is plugged into. Press Connect, pick the Arduino's port, and keep this tab open during the show.</p>
+  <p class="host__browser t-small" id="browser-note" hidden>This browser cannot read a serial port. Use Chrome or Edge on a laptop.</p>
+
+  <div class="host__actions">
+    <button class="textbtn" id="connect" type="button">Connect</button>
+    <span class="note" id="mode"></span>
+  </div>
+
+  <dl class="host__rows">
+    <div><dt>Serial</dt><dd id="v-conn">Not connected</dd></div>
+    <div><dt>Warm-up</dt><dd id="v-warm">—</dd></div>
+    <div><dt>Lamp state</dt><dd id="v-state">—</dd></div>
+    <div><dt>Server</dt><dd id="v-server">—</dd></div>
+    <div><dt>Last heartbeat</dt><dd id="v-beat">—</dd></div>
+  </dl>
+
+  <p class="host__warn t-small" id="warn" hidden></p>
+
+  <h2 class="host__h t-h3">Recent serial lines</h2>
+  <ol class="host__log" id="log" aria-live="off"><li class="note">Nothing yet.</li></ol>
+</main>
+
+<script src="config.js"></script>
+<script src="js/backend.js"></script>
+<script src="js/host.js"></script>
+</body>
+</html>

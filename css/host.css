@@ -1,0 +1,18 @@
+/* Host page: plain, only the presenter sees it. Tokens come from style.css. */
+body.host { overflow: auto; }
+.host__wrap { max-width: 720px; margin: 0 auto; padding: var(--space-6) var(--margin) var(--space-7); }
+.host__tag { font-size: var(--type-small); color: var(--text-muted); vertical-align: middle; border: var(--hair) solid var(--line); padding: 0 var(--space-2); margin-left: var(--space-2); }
+.host__lead { margin-top: var(--space-3); color: var(--text-muted); }
+.host__browser { margin-top: var(--space-3); color: var(--text); border-top: var(--hair) solid var(--text); padding-top: var(--space-2); }
+.host__actions { margin-top: var(--space-5); display: flex; align-items: baseline; gap: var(--space-4); }
+.host__rows { margin-top: var(--space-5); }
+.host__rows div { display: flex; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) 0; border-top: var(--hair) solid var(--line); font-size: var(--type-small); line-height: var(--type-small-lh); }
+.host__rows div:last-child { border-bottom: var(--hair) solid var(--line); }
+.host__rows dt { color: var(--text-muted); }
+.host__rows dd { margin: 0; text-align: right; font-variant-numeric: tabular-nums; }
+.host__warn { margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border: var(--hair) solid var(--text); }
+.host__h { margin-top: var(--space-6); margin-bottom: var(--space-3); }
+.host__log { margin: 0; padding: 0; list-style: none; font-family: ui-monospace, Menlo, monospace; font-size: var(--type-note); line-height: var(--type-note-lh); color: var(--text-muted); }
+.host__log li { padding: var(--space-1) 0; border-top: var(--hair) solid var(--line); white-space: pre-wrap; word-break: break-all; }
+.host__log li:first-child { color: var(--text); }
+.textbtn[disabled] { color: var(--text-faint); border-bottom-color: var(--line); cursor: default; }
